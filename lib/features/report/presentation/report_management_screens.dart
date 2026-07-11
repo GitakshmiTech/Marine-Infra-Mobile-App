@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import '../../../app/app_colors.dart';
 import '../../../app/app_text_style.dart';
+import 'report_detail_screens.dart';
 
 class ReportManagementScreen extends StatefulWidget {
-  const ReportManagementScreen({super.key});
+  final String initialView;
+  final ValueChanged<String>? onViewChanged;
+  const ReportManagementScreen({super.key, this.initialView = 'list', this.onViewChanged});
 
   @override
   State<ReportManagementScreen> createState() => _ReportManagementScreenState();
@@ -12,6 +15,34 @@ class ReportManagementScreen extends StatefulWidget {
 class _ReportManagementScreenState extends State<ReportManagementScreen> {
   String _selectedStatus = 'All';
   String _selectedType = 'All Types';
+  late String _currentView;
+  Map<String, dynamic>? _selectedReport;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentView = widget.initialView;
+  }
+
+  @override
+  void didUpdateWidget(covariant ReportManagementScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.initialView != widget.initialView) {
+      setState(() {
+        _currentView = widget.initialView;
+      });
+    }
+  }
+
+  void _setView(String view, {Map<String, dynamic>? report}) {
+    setState(() {
+      _currentView = view;
+      _selectedReport = report;
+    });
+    if (widget.onViewChanged != null) {
+      widget.onViewChanged!(view);
+    }
+  }
 
   // Mock Report Data
   final List<Map<String, dynamic>> _reports = [
@@ -85,6 +116,26 @@ class _ReportManagementScreenState extends State<ReportManagementScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (_currentView == 'details' && _selectedReport != null) {
+      final type = _selectedReport!['type'] ?? '';
+      if (type == 'Lashing & Measurement') {
+        return LashingReportDetailScreen(
+          report: _selectedReport!,
+          onBack: () => _setView('list'),
+        );
+      } else if (type == 'ODC Survey') {
+        return OdcReportDetailScreen(
+          report: _selectedReport!,
+          onBack: () => _setView('list'),
+        );
+      } else {
+        return ContainerDamageDetailScreen(
+          report: _selectedReport!,
+          onBack: () => _setView('list'),
+        );
+      }
+    }
+
     // Filter logic
     final filteredReports = _reports.where((rep) {
       final matchesStatus = _selectedStatus == 'All' || rep['status'] == _selectedStatus;
@@ -137,8 +188,10 @@ class _ReportManagementScreenState extends State<ReportManagementScreen> {
               itemCount: filteredReports.length,
               itemBuilder: (context, index) {
                 final report = filteredReports[index];
-                return Container(
-                  margin: const EdgeInsets.only(bottom: 12),
+                return GestureDetector(
+                  onTap: () => _setView('details', report: report),
+                  child: Container(
+                    margin: const EdgeInsets.only(bottom: 12),
                   decoration: BoxDecoration(
                     color: AppColors.cardBg,
                     borderRadius: BorderRadius.circular(20),
@@ -228,8 +281,9 @@ class _ReportManagementScreenState extends State<ReportManagementScreen> {
                       const Icon(Icons.more_vert_rounded, color: AppColors.textSecondary, size: 18),
                     ],
                   ),
-                );
-              },
+                ),
+              );
+            },
             ),
           ),
         ],

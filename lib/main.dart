@@ -12,10 +12,10 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Marine Survey Admin Portal',
+      title: 'Marine Infra',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.darkTheme,
-      initialRoute: '/login',
+      initialRoute: '/',
       onGenerateRoute: AppRouter.generateRoute,
     );
   }

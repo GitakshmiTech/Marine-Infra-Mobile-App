@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../app/app_colors.dart';
 import '../../app/app_text_style.dart';
+import 'mock_media_picker.dart';
 
 class CustomSignaturePad extends StatefulWidget {
   final Function(List<Offset> points) onSignatureChanged;
@@ -22,6 +23,41 @@ class _CustomSignaturePadState extends State<CustomSignaturePad> {
       _points.clear();
     });
     widget.onSignatureChanged(_points);
+  }
+
+  Future<void> _simulateUpload() async {
+    final result = await MockMediaPicker.showFilePicker(
+      context,
+      allowedExtensions: ['png', 'jpg'],
+    );
+    if (result != null) {
+      setState(() {
+        _points.clear();
+        // Cursive path representing the signature loaded from file
+        _points.addAll([
+          const Offset(40, 110),
+          const Offset(55, 75),
+          const Offset(65, 125),
+          const Offset(85, 95),
+          const Offset(105, 115),
+          const Offset(120, 80),
+          const Offset(140, 110),
+          const Offset(155, 90),
+          const Offset(175, 115),
+          Offset.infinite,
+          const Offset(70, 130),
+          const Offset(180, 130),
+          Offset.infinite,
+        ]);
+      });
+      widget.onSignatureChanged(_points);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Signature file "${result.name}" uploaded successfully!'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
   }
 
   @override
@@ -66,14 +102,22 @@ class _CustomSignaturePadState extends State<CustomSignaturePad> {
         ),
         const SizedBox(height: 8),
         Row(
-          mainAxisAlignment: MainAxisAlignment.end,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
+            TextButton.icon(
+              onPressed: _simulateUpload,
+              icon: const Icon(Icons.upload_file_rounded, size: 16, color: AppColors.primaryBlue),
+              label: Text(
+                'Upload Signature',
+                style: AppTextStyle.bodyMedium.copyWith(color: AppColors.primaryBlue, fontWeight: FontWeight.bold),
+              ),
+            ),
             TextButton.icon(
               onPressed: _clear,
               icon: const Icon(Icons.clear, size: 16, color: AppColors.error),
               label: Text(
                 'Clear',
-                style: AppTextStyle.bodyMedium.copyWith(color: AppColors.error),
+                style: AppTextStyle.bodyMedium.copyWith(color: AppColors.error, fontWeight: FontWeight.bold),
               ),
             ),
           ],
@@ -103,5 +147,5 @@ class SignaturePainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(SignaturePainter oldDelegate) => oldDelegate.points != points;
+  bool shouldRepaint(SignaturePainter oldDelegate) => true;
 }

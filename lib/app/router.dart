@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../features/authentication/presentation/login_screen.dart';
+import '../features/authentication/presentation/splash_screen.dart';
 import '../features/dashboard/presentation/dashboard_screen.dart';
 import '../features/dashboard/presentation/dashboard_analytics_screen.dart';
 import '../features/user_management/presentation/user_management_screens.dart';
@@ -13,14 +14,25 @@ import '../features/profile/presentation/profile_screen.dart';
 class AppRouter {
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
+      case '/':
+      case '/splash':
+        return MaterialPageRoute(builder: (_) => const SplashScreen());
+
       case '/login':
         return MaterialPageRoute(builder: (_) => const LoginScreen());
 
+      case '/forgot-password':
+        return MaterialPageRoute(builder: (_) => const ForgotPasswordScreen());
+
+      case '/reset-password':
+        return MaterialPageRoute(builder: (_) => const ResetPasswordScreen());
+
       case '/dashboard':
+        final role = settings.arguments as String? ?? 'Company Admin';
         return MaterialPageRoute(
-          builder: (_) => const AdminLayout(
+          builder: (_) => AdminLayout(
             activeRoute: '/dashboard',
-            child: DashboardScreen(),
+            initialRole: role,
           ),
         );
 

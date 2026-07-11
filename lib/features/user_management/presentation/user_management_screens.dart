@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import '../../../app/app_colors.dart';
 import '../../../app/app_text_style.dart';
@@ -15,21 +16,11 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
   late String _currentView;
   Map<String, dynamic>? _selectedUser;
 
-  @override
-  void initState() {
-    super.initState();
-    _currentView = widget.viewMode;
-  }
-
-  @override
-  void didUpdateWidget(covariant UserManagementScreen oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.viewMode != widget.viewMode) {
-      setState(() {
-        _currentView = widget.viewMode;
-      });
-    }
-  }
+  // Controllers for CRUD operations
+  final _nameController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _mobileController = TextEditingController();
+  String _selectedRole = 'Prepared By';
 
   // Mock User List Data
   final List<Map<String, dynamic>> _users = [
@@ -122,7 +113,40 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
     setState(() {
       _currentView = view;
       _selectedUser = user;
+      if (view == 'edit' && user != null) {
+        _nameController.text = user['name'];
+        _emailController.text = user['email'];
+        _mobileController.text = user['mobile'];
+        _selectedRole = user['role'];
+      } else if (view == 'add') {
+        _nameController.clear();
+        _emailController.clear();
+        _mobileController.clear();
+        _selectedRole = 'Prepared By';
+      }
     });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _currentView = widget.viewMode;
+  }
+
+  @override
+  void didUpdateWidget(covariant UserManagementScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.viewMode != widget.viewMode) {
+      _setView(widget.viewMode);
+    }
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _emailController.dispose();
+    _mobileController.dispose();
+    super.dispose();
   }
 
   @override
@@ -156,9 +180,9 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.symmetric(horizontal: 16),
               children: [
-                _buildOverviewCard('Total Users', '124', 'All users', _selectedStatus == 'All', () => setState(() => _selectedStatus = 'All'), Colors.blue),
-                _buildOverviewCard('Active Users', '98', '79.0%', _selectedStatus == 'Active', () => setState(() => _selectedStatus = 'Active'), Colors.green),
-                _buildOverviewCard('Inactive Users', '18', '14.5%', _selectedStatus == 'Inactive', () => setState(() => _selectedStatus = 'Inactive'), Colors.orange),
+                _buildOverviewCard('Total Users', '${_users.length}', 'All users', _selectedStatus == 'All', () => setState(() => _selectedStatus = 'All'), Colors.blue),
+                _buildOverviewCard('Active Users', '${_users.where((u) => u['status'] == 'Active').length}', 'Active', _selectedStatus == 'Active', () => setState(() => _selectedStatus = 'Active'), Colors.green),
+                _buildOverviewCard('Inactive Users', '${_users.where((u) => u['status'] != 'Active').length}', 'Inactive', _selectedStatus == 'Inactive', () => setState(() => _selectedStatus = 'Inactive'), Colors.orange),
               ],
             ),
           ),
@@ -462,29 +486,35 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
                 Text('Personal & Official Details', style: AppTextStyle.body16Medium.copyWith(fontWeight: FontWeight.bold)),
                 const SizedBox(height: 16),
                 TextFormField(
-                  initialValue: isEdit ? _selectedUser!['name'] : '',
+                  controller: _nameController,
                   decoration: const InputDecoration(labelText: 'Full Name'),
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
-                  initialValue: isEdit ? _selectedUser!['email'] : '',
+                  controller: _emailController,
                   decoration: const InputDecoration(labelText: 'Email Address'),
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
-                  initialValue: isEdit ? _selectedUser!['mobile'] : '',
+                  controller: _mobileController,
                   decoration: const InputDecoration(labelText: 'Mobile Number'),
                 ),
                 const SizedBox(height: 12),
                 DropdownButtonFormField<String>(
-                  value: isEdit ? _selectedUser!['role'] : 'Prepared By',
+                  value: _selectedRole,
                   items: const [
                     DropdownMenuItem(value: 'Company Admin', child: Text('Company Admin')),
                     DropdownMenuItem(value: 'Prepared By', child: Text('Prepared By')),
                     DropdownMenuItem(value: 'Survey By', child: Text('Survey By')),
                     DropdownMenuItem(value: 'Checked By', child: Text('Checked By')),
                   ],
-                  onChanged: (val) {},
+                  onChanged: (val) {
+                    if (val != null) {
+                      setState(() {
+                        _selectedRole = val;
+                      });
+                    }
+                  },
                   decoration: const InputDecoration(labelText: 'System Access Role'),
                 ),
                 const SizedBox(height: 28),
@@ -497,7 +527,36 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
                     ),
                     const SizedBox(width: 12),
                     ElevatedButton(
-                      onPressed: () => _setView('list'),
+                      onPressed: () {
+                        if (isEdit) {
+                          final idx = _users.indexWhere((u) => u['id'] == _selectedUser!['id']);
+                          if (idx != -1) {
+                            setState(() {
+                              _users[idx]['name'] = _nameController.text;
+                              _users[idx]['email'] = _emailController.text;
+                              _users[idx]['mobile'] = _mobileController.text;
+                              _users[idx]['role'] = _selectedRole;
+                            });
+                          }
+                        } else {
+                          setState(() {
+                            _users.add({
+                              'id': 'EMP-0${_users.length + 1}',
+                              'name': _nameController.text,
+                              'isYou': false,
+                              'email': _emailController.text,
+                              'mobile': _mobileController.text,
+                              'role': _selectedRole,
+                              'status': 'Active',
+                              'avatar': '',
+                              'initials': _nameController.text.isNotEmpty
+                                  ? _nameController.text.substring(0, min(2, _nameController.text.length)).toUpperCase()
+                                  : 'US',
+                            });
+                          });
+                        }
+                        _setView('list');
+                      },
                       child: Text(isEdit ? 'Save Changes' : 'Register User'),
                     ),
                   ],

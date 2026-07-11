@@ -66,5 +66,9 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>NSCameraUsageDescription</key>
+	<string>This app requires camera access to capture survey photos of vessel, cargo, and lashing structures.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>This app requires access to photo gallery to select survey photos and digital signatures.</string>
 </dict>
 </plist>

@@ -131,4 +131,52 @@ class AppTextStyle {
   static const TextStyle bodySmall = body12Regular;
   static const TextStyle labelLarge = body14Medium;
   static const TextStyle labelSmall = body08Medium;
+
+  static const TextStyle body15Semibold = TextStyle(
+    fontFamily: fontFamily,
+    fontSize: 15,
+    fontWeight: FontWeight.w600,
+    color: AppColors.textPrimary,
+    height: 1.20,
+  );
+
+  static const TextStyle body14Semibold = TextStyle(
+    fontFamily: fontFamily,
+    fontSize: 14,
+    fontWeight: FontWeight.w600,
+    color: AppColors.textPrimary,
+    height: 1.20,
+  );
+
+  static const TextStyle body13Semibold = TextStyle(
+    fontFamily: fontFamily,
+    fontSize: 13,
+    fontWeight: FontWeight.w600,
+    color: AppColors.textPrimary,
+    height: 1.20,
+  );
+
+  static const TextStyle body13Medium = TextStyle(
+    fontFamily: fontFamily,
+    fontSize: 13,
+    fontWeight: FontWeight.w500,
+    color: AppColors.textPrimary,
+    height: 1.20,
+  );
+
+  static const TextStyle body12Medium = TextStyle(
+    fontFamily: fontFamily,
+    fontSize: 12,
+    fontWeight: FontWeight.w500,
+    color: AppColors.textPrimary,
+    height: 1.20,
+  );
+
+  static const TextStyle body11Medium = TextStyle(
+    fontFamily: fontFamily,
+    fontSize: 11,
+    fontWeight: FontWeight.w500,
+    color: AppColors.textPrimary,
+    height: 1.20,
+  );
 }
